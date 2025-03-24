@@ -1,5 +1,7 @@
 import "./App.css";
+import { CombinedChart } from "./components/CombinedChart";
 import { DataChart } from "./components/DataChart";
+import { DraggableChart } from "./components/DraggableChart";
 import { DrawLineChart } from "./components/DrawLineChart";
 import { SampleChart } from "./components/SampleChart";
 
@@ -19,6 +21,14 @@ function App() {
 					<div style={{ margin: "2rem" }}>
 						<h1>線を描画できるチャート</h1>
 						<DrawLineChart />
+					</div>
+					<div style={{ margin: "2rem" }}>
+						<h1>折れ線チャートと棒チャートの複合表示</h1>
+						<CombinedChart />
+					</div>
+					<div style={{ margin: "2rem" }}>
+						<h1>データポイントをドラッグできるチャート（仮）</h1>
+						<DraggableChart />
 					</div>
 				</div>
 			</header>
