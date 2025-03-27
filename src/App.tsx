@@ -4,6 +4,7 @@ import { DataChart } from "./components/DataChart";
 import { DraggableChart } from "./components/DraggableChart";
 import { DrawLineChart } from "./components/DrawLineChart";
 import { SampleChart } from "./components/SampleChart";
+import {StockChart} from "./components/StockChart";
 
 function App() {
 	return (
@@ -29,6 +30,10 @@ function App() {
 					<div style={{ margin: "2rem" }}>
 						<h1>データポイントをドラッグできるチャート（仮）</h1>
 						<DraggableChart />
+					</div>
+					<div style={{ margin: "2rem" }}>
+						<h1>株価チャート</h1>
+						<StockChart />
 					</div>
 				</div>
 			</header>
