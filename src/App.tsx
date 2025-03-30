@@ -2,9 +2,10 @@ import "./App.css";
 import { CombinedChart } from "./components/CombinedChart";
 import { DataChart } from "./components/DataChart";
 import { DraggableChart } from "./components/DraggableChart";
+import DraggableStockChart from "./components/DraggableStockChart";
 import { DrawLineChart } from "./components/DrawLineChart";
 import { SampleChart } from "./components/SampleChart";
-import {StockChart} from "./components/StockChart";
+import { StockChart } from "./components/StockChart";
 
 function App() {
 	return (
@@ -34,6 +35,10 @@ function App() {
 					<div style={{ margin: "2rem" }}>
 						<h1>株価チャート</h1>
 						<StockChart />
+					</div>
+					<div style={{ margin: "2rem" }}>
+						<h1>株価チャート２（エラー）</h1>
+						<DraggableStockChart />
 					</div>
 				</div>
 			</header>
