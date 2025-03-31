@@ -23,6 +23,8 @@ export const CombinedChart: React.FC = () => {
 				name: "売上（棒）",
 				data: [5, 3, 4, 7, 2],
 				color: "#7cb5ec",
+				pointPadding: 0,
+				groupPadding: 0,
 			},
 			{
 				type: "line",
