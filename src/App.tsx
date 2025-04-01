@@ -6,6 +6,7 @@ import { DraggableChart } from "./components/DraggableChart";
 import DraggableStockChart from "./components/DraggableStockChart";
 import { DrawLineChart } from "./components/DrawLineChart";
 import { SampleChart } from "./components/SampleChart";
+import { ScatterPlotChart } from "./components/ScatterPlotChart";
 import { StockChart } from "./components/StockChart";
 
 function App() {
@@ -47,6 +48,7 @@ function App() {
 					</div>
 					<div style={{ margin: "2rem" }}>
 						<h1>散布図</h1>
+						<ScatterPlotChart />
 					</div>
 					<div style={{ margin: "2rem" }}>
 						<h1>予想ランキング</h1>
