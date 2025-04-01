@@ -37,7 +37,7 @@ function App() {
 						<StockChart />
 					</div>
 					<div style={{ margin: "2rem" }}>
-						<h1>株価チャート２（エラー）</h1>
+						<h1>inputとgraphの同期</h1>
 						<DraggableStockChart />
 					</div>
 				</div>
