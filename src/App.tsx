@@ -1,5 +1,6 @@
 import "./App.css";
 import { CombinedChart } from "./components/CombinedChart";
+import { CompareMultipleChart } from "./components/CompareMultipleChart";
 import { DataChart } from "./components/DataChart";
 import { DraggableChart } from "./components/DraggableChart";
 import DraggableStockChart from "./components/DraggableStockChart";
@@ -39,6 +40,16 @@ function App() {
 					<div style={{ margin: "2rem" }}>
 						<h1>inputとgraphの同期</h1>
 						<DraggableStockChart />
+					</div>
+					<div style={{ margin: "2rem" }}>
+						<h1>複数の折れ線チャート</h1>
+						<CompareMultipleChart />
+					</div>
+					<div style={{ margin: "2rem" }}>
+						<h1>散布図</h1>
+					</div>
+					<div style={{ margin: "2rem" }}>
+						<h1>予想ランキング</h1>
 					</div>
 				</div>
 			</header>
