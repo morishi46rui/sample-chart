@@ -1,6 +1,14 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import Highcharts from "highcharts/highstock";
 import HighchartsReact from "highcharts-react-official";
+import HighchartsDraggablePoints from "highcharts/modules/draggable-points";
+
+// モジュールを適用
+if (typeof HighchartsDraggablePoints === "function") {
+	HighchartsDraggablePoints(Highcharts);
+} else {
+	console.error("HighchartsDraggablePoints is not a function. Check the module import.");
+}
 
 // 株価ダミーデータ生成
 const generateRealisticDummyData = () => {
@@ -20,34 +28,46 @@ const generateRealisticDummyData = () => {
 
 // 営業利益データ生成
 const generateQuarterlyProfitData = (): { data: [number, number][]; forecastData: [number, number][] } => {
-	const data: [number, number][] = [];
-	const forecastData: [number, number][] = [];
-	const startDate = new Date(2022, 4, 1).getTime();
-	const quarterDuration = 3 * 30 * 24 * 60 * 60 * 1000;
+	const data: [number, number][] = [
+		[new Date("2022-03-31").getTime(), 100],
+		[new Date("2023-03-31").getTime(), 150],
+		[new Date("2024-03-31").getTime(), 200],
+		[new Date("2025-03-31").getTime(), 250],
+		// [new Date("2025-06-31").getTime(), 250],
+		// [new Date("2025-09-31").getTime(), 250],
+		// [new Date("2025-12-31").getTime(), 250],
+	];
 
-	for (let i = 0; i < 12; i++) {
-		const date = startDate + i * quarterDuration;
-		const profit = Math.round((Math.random() * 200 + 200) * 100) / 100;
-		data.push([date, profit]);
-	}
-
-	for (let i = 12; i < 13; i++) {
-		const date = startDate + i * quarterDuration;
-		const profit = Math.round((Math.random() * 200 + 200) * 100) / 100;
-		forecastData.push([date, profit]);
-	}
+	const forecastData: [number, number][] = [
+		[new Date("2026-03-31").getTime(), 300],
+		[new Date("2026-06-30").getTime(), 350],
+		[new Date("2026-09-30").getTime(), 330],
+		[new Date("2026-012-31").getTime(), 330],
+		[new Date("2027-03-31").getTime(), 350],
+	];
 
 	return { data, forecastData };
 };
 
-export const DraggableStockChart: React.FC = () => {
-	const [forecastDate, setForecastDate] = useState("");
-	const [forecastTargetPrice, setForecastTargetPrice] = useState("");
-	const [forecastRiskPrice, setForecastRiskPrice] = useState("");
+const generateForecastStockPriceData = () => {
+	const data: [number, number, number][] = [
+		// [new Date("2023-03-31").getTime(), 1200, 550],
+		// [new Date("2024-03-31").getTime(), 1300, 0],
+		// [new Date("2025-03-31").getTime(), 1400, 0],
+		[new Date("2025-06-31").getTime(), 1500, 1000],
+		[new Date("2026-06-31").getTime(), 1600, 900],
+	];
 
-	const [targetPrices, setTargetPrices] = useState<Array<[number, number]>>([]);
-	const [riskPrices, setRiskPrices] = useState<Array<[number, number]>>([]);
+	return data;
+};
+
+export const DraggableStockChart: React.FC = () => {
 	const [forecastProfitData, setForecastProfitData] = useState<Array<[number, number]>>([]);
+
+	const [forecastStockPrice, setForecastStockPrice] = useState<Array<[number, number, number]>>(generateForecastStockPriceData());
+
+	console.log("========= forecastStockPrice ==========");
+	console.log(forecastStockPrice);
 
 	const chartRef = useRef<HighchartsReact.RefObject>(null);
 
@@ -58,48 +78,6 @@ export const DraggableStockChart: React.FC = () => {
 		setForecastProfitData(initialForecastData);
 	}, [initialForecastData]);
 
-	// 入力変更 → チャート反映
-	const handleTargetPriceChange = (value: string) => {
-		setForecastTargetPrice(value);
-		const date = new Date(forecastDate).getTime();
-		const newValue = Number.parseFloat(value);
-		if (!forecastDate || Number.isNaN(newValue)) return;
-
-		setTargetPrices((prev) => {
-			const found = prev.some(([d]) => d === date);
-			if (found) return prev.map(([d, y]) => (d === date ? [d, newValue] : [d, y]));
-			return [...prev, [date, newValue]];
-		});
-	};
-
-	const handleRiskPriceChange = (value: string) => {
-		setForecastRiskPrice(value);
-		const date = new Date(forecastDate).getTime();
-		const newValue = Number.parseFloat(value);
-		if (!forecastDate || Number.isNaN(newValue)) return;
-
-		setRiskPrices((prev) => {
-			const found = prev.some(([d]) => d === date);
-			if (found) return prev.map(([d, y]) => (d === date ? [d, newValue] : [d, y]));
-			return [...prev, [date, newValue]];
-		});
-	};
-
-	const handleAddForecast = () => {
-		if (!forecastDate) return;
-
-		const date = new Date(forecastDate).getTime();
-		const target = Number.parseFloat(forecastTargetPrice);
-		const risk = Number.parseFloat(forecastRiskPrice);
-
-		if (!Number.isNaN(target)) {
-			setTargetPrices([...targetPrices, [date, target]]);
-		}
-		if (!Number.isNaN(risk)) {
-			setRiskPrices([...riskPrices, [date, risk]]);
-		}
-	};
-
 	useEffect(() => {
 		const chart = chartRef.current?.chart;
 		if (!chart) return;
@@ -108,76 +86,6 @@ export const DraggableStockChart: React.FC = () => {
 		const extremes = chart.xAxis[0].getExtremes();
 		chart.xAxis[0].setExtremes(extremes.min, extremes.max + padding);
 	}, []);
-
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-	useEffect(() => {
-		const chart = chartRef.current?.chart;
-		if (!chart) return;
-
-		let isDragging = false;
-		let draggingPoint: Highcharts.Point | null = null;
-
-		const onMouseDown = (e: MouseEvent, point: Highcharts.Point) => {
-			isDragging = true;
-			draggingPoint = point;
-			document.body.style.cursor = "grabbing";
-		};
-
-		const onMouseMove = (e: MouseEvent) => {
-			if (!isDragging || !draggingPoint || !draggingPoint.series || !draggingPoint.series.yAxis) return;
-			const chart = chartRef.current?.chart;
-			if (!chart || !chart.pointer) return;
-
-			const chartPosition = chart.pointer.normalize(e);
-			const yAxis = draggingPoint.series.yAxis;
-			const newValue = yAxis.toValue(chartPosition.chartY);
-			draggingPoint.update(newValue, true, false);
-
-			const x = draggingPoint.x;
-
-			if (draggingPoint.series.name === "予想営業利益") {
-				setForecastProfitData((prev) => prev.map(([dx, dy]) => (dx === x ? [dx, newValue] : [dx, dy])));
-			}
-			if (draggingPoint.series.name === "目標株価") {
-				setTargetPrices((prev) => prev.map(([dx, dy]) => (dx === x ? [dx, newValue] : [dx, dy])));
-			}
-			if (draggingPoint.series.name === "リスク値") {
-				setRiskPrices((prev) => prev.map(([dx, dy]) => (dx === x ? [dx, newValue] : [dx, dy])));
-			}
-		};
-
-		const onMouseUp = () => {
-			isDragging = false;
-			draggingPoint = null;
-			document.body.style.cursor = "";
-		};
-
-		const attachDragEvents = () => {
-			const draggableSeriesNames = ["予想営業利益", "目標株価", "リスク値"];
-			for (const seriesName of draggableSeriesNames) {
-				const series = chart.series.find((s) => s.name === seriesName);
-				if (series) {
-					for (const point of series.points) {
-						const el = point.graphic?.element;
-						if (!el) continue;
-						el.style.cursor = "ns-resize";
-						el.onmousedown = (e) => onMouseDown(e as MouseEvent, point);
-					}
-				}
-			}
-		};
-
-		attachDragEvents();
-		chart.redraw();
-		document.addEventListener("mousemove", onMouseMove);
-		document.addEventListener("mouseup", onMouseUp);
-		chart.update({}, true, false);
-
-		return () => {
-			document.removeEventListener("mousemove", onMouseMove);
-			document.removeEventListener("mouseup", onMouseUp);
-		};
-	}, [forecastProfitData, targetPrices, riskPrices]);
 
 	const options: Highcharts.Options = {
 		title: { text: "株価と四半期ごとの営業利益データ" },
@@ -192,8 +100,40 @@ export const DraggableStockChart: React.FC = () => {
 		],
 		series: [
 			{ name: "株価", data: realisticData, type: "line", yAxis: 0 },
-			{ name: "営業利益", data: profitData, type: "column", yAxis: 1, color: "rgba(0, 0, 255, 0.4)" },
-			{ name: "予想営業利益", data: forecastProfitData, type: "column", yAxis: 1, color: "rgba(255, 165, 0, 0.7)" },
+			{
+				name: "営業利益",
+				type: "column",
+				data: profitData,
+				yAxis: 1,
+				color: "rgba(0, 0, 255, 0.4)",
+				// 棒グラフの右側をデータの日付にしたいため、width分左にずらす
+				pointPlacement: -20,
+			},
+			{
+				name: "予想営業利益",
+				// data: forecastProfitData,
+				// 下記のmapが無いとエラー
+				data: forecastProfitData.map(([x, y]) => ({ x, y })),
+				type: "column",
+				yAxis: 1,
+				color: "rgba(255, 165, 0, 0.7)",
+				dragDrop: {
+					draggableY: true,
+				},
+				point: {
+					events: {
+						dragStart: function (e: any) {
+							// console.log(`========= dragStart! ==========`);
+						},
+						drag: function (e: any) {
+							console.log("========= drag! ==========");
+						},
+						drop: function (e: any) {
+							setForecastProfitData((prev) => prev.map(([dx, dy]) => (dx === e.target.x ? [dx, e.newPoint.y] : [dx, dy])));
+						},
+					},
+				},
+			},
 			{
 				name: "DCF",
 				data: [
@@ -240,21 +180,48 @@ export const DraggableStockChart: React.FC = () => {
 			},
 			{
 				name: "目標株価",
-				data: targetPrices,
+				data: forecastStockPrice.map(([timestamp, targetPrice]) => [timestamp, targetPrice]),
 				type: "line",
 				yAxis: 0,
 				color: "green",
 				dashStyle: "ShortDot",
 				marker: { enabled: true, symbol: "circle" },
+				dragDrop: {
+					draggableY: true, // Y軸方向のドラッグを有効化
+				},
+				point: {
+					events: {
+						drag: function (e: any) {
+							// console.log(`Dragging target price: x=${e.newX}, y=${e.newY}`);
+						},
+						drop: function (e: any) {
+							setForecastStockPrice((prev) => prev.map(([dx, dt, dr]) => (dx === e.target.x ? [dx, e.newPoint.y, dr] : [dx, dt, dr])));
+						},
+					},
+				},
 			},
 			{
 				name: "リスク値",
-				data: riskPrices,
+				data: forecastStockPrice.map(([timestamp, , riskPrice]) => [timestamp, riskPrice]),
 				type: "line",
 				yAxis: 0,
 				color: "red",
 				dashStyle: "ShortDot",
 				marker: { enabled: true, symbol: "triangle" },
+				dragDrop: {
+					draggableY: true, // Y軸方向のドラッグを有効化
+				},
+				point: {
+					events: {
+						drag: function (e: any) {
+							console.log(`Dragging risk price: x=${e.newX}, y=${e.newY}`);
+						},
+						drop: function (e: any) {
+							console.log(`Dropped risk price: x=${e.newX}, y=${e.newY}`);
+							setForecastStockPrice((prev) => prev.map(([dx, dt, dr]) => (dx === e.target.x ? [dx, dt, e.newPoint.y] : [dx, dt, dr])));
+						},
+					},
+				},
 			},
 		],
 		plotOptions: {
@@ -285,39 +252,93 @@ export const DraggableStockChart: React.FC = () => {
 			<div style={{ marginBottom: "1rem" }}>
 				<h3>予想営業利益</h3>
 				<ul>
-					{forecastProfitData.map(([timestamp, profit]) => (
+					{forecastProfitData.map(([timestamp, profit], index) => (
 						<li key={timestamp}>
-							{new Date(timestamp).toLocaleDateString()}：{profit.toLocaleString()} 億円
+							<label>
+								{new Date(timestamp).toLocaleDateString()}：
+								<input
+									type="number"
+									value={profit}
+									onChange={(e) => {
+										const newProfit = Number.parseFloat(e.target.value);
+										if (!Number.isNaN(newProfit)) {
+											setForecastProfitData((prev) => prev.map(([dx, dy], i) => (i === index ? [dx, newProfit] : [dx, dy])));
+										}
+									}}
+									style={{ marginLeft: "0.5rem" }}
+								/>
+								億円
+							</label>
 						</li>
 					))}
 				</ul>
 			</div>
 
 			<div style={{ marginBottom: "1rem" }}>
-				<label>
-					予想対象日：
-					<input type="date" value={forecastDate} onChange={(e) => setForecastDate(e.target.value)} style={{ marginRight: "1rem" }} />
-				</label>
-				<label>
-					目標株価：
-					<input
-						type="number"
-						value={forecastTargetPrice}
-						onChange={(e) => handleTargetPriceChange(e.target.value)}
-						style={{ marginRight: "1rem" }}
-					/>
-				</label>
-				<label>
-					リスク値：
-					<input
-						type="number"
-						value={forecastRiskPrice}
-						onChange={(e) => handleRiskPriceChange(e.target.value)}
-						style={{ marginRight: "1rem" }}
-					/>
-				</label>
-				<button type="button" onClick={handleAddForecast}>
-					追加
+				<h3>予想データの追加</h3>
+				<ul>
+					{forecastStockPrice.map(([timestamp, targetPrice, riskPrice], index) => (
+						<li key={timestamp} style={{ marginBottom: "0.5rem" }}>
+							<label>
+								予想対象日：
+								<input
+									type="date"
+									value={new Date(timestamp).toISOString().split("T")[0]}
+									onChange={(e) => {
+										const newDate = new Date(e.target.value).getTime();
+										setForecastStockPrice((prev) => prev.map(([dx, dt, dr], i) => (i === index ? [newDate, dt, dr] : [dx, dt, dr])));
+									}}
+									style={{ marginRight: "1rem" }}
+								/>
+							</label>
+							<label>
+								目標株価：
+								<input
+									type="number"
+									value={targetPrice}
+									onChange={(e) => {
+										const newTarget = Number.parseFloat(e.target.value);
+										if (!Number.isNaN(newTarget)) {
+											setForecastStockPrice((prev) => prev.map(([dx, dt, dr], i) => (i === index ? [dx, newTarget, dr] : [dx, dt, dr])));
+										}
+									}}
+									style={{ marginRight: "1rem" }}
+								/>
+							</label>
+							<label>
+								リスク値：
+								<input
+									type="number"
+									value={riskPrice}
+									onChange={(e) => {
+										const newRisk = Number.parseFloat(e.target.value);
+										if (!Number.isNaN(newRisk)) {
+											setForecastStockPrice((prev) => prev.map(([dx, dt, dr], i) => (i === index ? [dx, dt, newRisk] : [dx, dt, dr])));
+										}
+									}}
+									style={{ marginRight: "1rem" }}
+								/>
+							</label>
+							<button
+								type="button"
+								onClick={() => {
+									setForecastStockPrice((prev) => prev.filter((_, i) => i !== index));
+								}}
+								style={{ marginLeft: "1rem", color: "red" }}
+							>
+								削除
+							</button>
+						</li>
+					))}
+				</ul>
+				<button
+					type="button"
+					onClick={() => {
+						const newDate = new Date().getTime();
+						setForecastStockPrice((prev) => [...prev, [newDate, 0, 0]]);
+					}}
+				>
+					新規追加
 				</button>
 			</div>
 
