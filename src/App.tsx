@@ -5,6 +5,7 @@ import { DataChart } from "./components/DataChart";
 import { DraggableChart } from "./components/DraggableChart";
 import DraggableStockChart from "./components/DraggableStockChart";
 import { DrawLineChart } from "./components/DrawLineChart";
+import { RankingChart } from "./components/RankingChart";
 import { SampleChart } from "./components/SampleChart";
 import { ScatterPlotChart } from "./components/ScatterPlotChart";
 import { StockChart } from "./components/StockChart";
@@ -52,6 +53,7 @@ function App() {
 					</div>
 					<div style={{ margin: "2rem" }}>
 						<h1>予想ランキング</h1>
+						<RankingChart />
 					</div>
 				</div>
 			</header>
