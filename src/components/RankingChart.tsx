@@ -13,6 +13,7 @@ export const RankingChart: React.FC = () => {
 			text: "",
 		},
 		xAxis: {
+			reversed: false,
 			title: {
 				text: "売上高",
 			},
