@@ -4,6 +4,11 @@ import HighchartsReact from "highcharts-react-official";
 export const RankingChart: React.FC = () => {
 	const salesValues = [3200, 3400, 3600, 3800, 4200];
 	const percentages = [30, 35, 10, 15, 5];
+	const plotLineValues = [8000, 3750];
+
+	// X軸の範囲を計算（plotLinesの値を含むように調整）
+	const xAxisMin = Math.min(...salesValues, ...plotLineValues);
+	const xAxisMax = Math.max(...salesValues, ...plotLineValues);
 
 	const options: Highcharts.Options = {
 		chart: {
@@ -14,10 +19,11 @@ export const RankingChart: React.FC = () => {
 		},
 		xAxis: {
 			reversed: false,
+			min: xAxisMin,
+			max: xAxisMax,
 			title: {
 				text: "売上高",
 			},
-			type: "linear",
 			labels: {
 				formatter: function () {
 					return this.value.toString();
@@ -25,7 +31,7 @@ export const RankingChart: React.FC = () => {
 			},
 			plotLines: [
 				{
-					value: 4000,
+					value: 8000,
 					color: "red",
 					width: 2,
 					dashStyle: "Dash",
